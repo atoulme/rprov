@@ -1,0 +1,3 @@
+require File.dirname(__FILE__) + '/test_helper.rb'
+
+# uh, to test this we need an Eclipse instance nearby...

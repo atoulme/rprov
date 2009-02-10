@@ -1,0 +1,13 @@
+= rprov
+
+== Description
+
+rprov is a tool for managing your Eclipse instance.
+
+== Usage
+
+Run the rprov executable in the bin folder.
+
+== License
+
+Copyright (c) Intalio, Inc. 2009

@@ -1,0 +1,107 @@
+#!/usr/bin/env ruby
+# Copyright (c) Intalio, Inc 2009
+
+preamble = "Copyright (c) Intalio, Inc 2009\n"
+usage = preamble + <<-USAGE
+  Type '#{$0} help' for usage  
+USAGE
+require File.dirname(__FILE__) + "/../lib/eclipse-provisioning"
+
+help_commands = ["-h", "/?", "--help", "help"]
+if help_commands.include? $*[0]
+  case $*[1]
+  when "status", "stat", "st"
+    puts preamble + <<-ST_HELP
+    
+status(st, stat) [-e eclipse_location] [bundle]: loads the Eclipse instance and prints the status of all the bundles
+  
+Options:
+
+  -e: gives the location of the Eclipse instance or use the current directory.
+  
+Arguments:
+
+  bundle: the name of a bundle to look for. The program will print its current status.
+Examples:
+
+  rprov st
+ 
+  rprov status -e /home/bob/eclipse
+  
+  rprov st org.eclipse.ui
+
+ST_HELP
+    exit
+  when "installed"
+    puts "TODO"
+    exit
+  when "uninstalled"
+    puts "TODO"
+    exit
+end
+
+# OK, no specific command help ? Let's output the general help and exit gracefully
+puts preamble + <<-HELP
+usage: rprov <subcommand> [options] [args]
+Eclipse provisioning Ruby client, version #{EclipseProvisioning::VERSION}
+
+Type 'rprov help <command-name>' for help on a specific subcommand.
+Type 'rprov --version' to see the program version.
+
+Available subcommands:
+    status (stat, st) 
+    installed
+    uninstalled
+
+HELP
+exit 0
+end
+
+case $*[0]   
+when "--version"
+  puts preamble + "rprov version #{EclipseProvisioning::VERSION}"
+  exit 0
+when "status", "stat", "st"
+  if $*.index("-e")
+    eclipse_location = $*.delete_at($*.index("-e") + 1)
+    $*.delete_at($*.index("-e"))
+  end
+
+  instance = EclipseInstance.new(eclipse_location || ".") 
+  
+  if $*.size > 1
+    for i in 1..($*.size - 1)
+      # enquiring about a specific plugin
+      bundles = instance.find(:name => $*[i])
+      if bundles && !bundles.empty?
+        for bundle in bundles
+          if instance.installed? bundle
+            puts "Installed: " + bundle.name + " " + bundle.version + ", located: " + bundle.file
+          else
+            puts "Not installed: " + bundle.name + " " + bundle.version + ", located: " + bundle.file
+          end
+          puts "Dependencies: " + (bundle.bundles.empty? ? "(empty)" : bundle.bundles.collect {|b| "#{b.name} (#{b.version})"}.join(", "))
+        end
+      else
+        puts "Could not find #{$*[i]}"
+      end
+    end
+    exit
+  end
+  
+  #default: output all installed an uninstalled packages
+  installed = instance.installed.sort {|a, b| a.name <=> b.name}
+  puts "== Installed bundles (#{installed.size})"
+  installed.each do |bundle|
+    puts "   " + bundle.name + " " + bundle.version
+  end
+  uninstalled = instance.uninstalled.sort {|a, b| a.name <=> b.name}
+  puts "== Uninstalled bundles (#{uninstalled.size})"
+  uninstalled.each do |bundle|
+    puts "   " + bundle.name + " " + bundle.version
+  end
+else 
+  puts usage
+  exit 1
+end
+
