@@ -19,8 +19,7 @@ spec = Gem::Specification.new do |s|
   s.summary = "rprov is a tool for managing your Eclipse instance."
   s.files = Dir["bin/**/*", "lib/**/*", "tasks/**/*", "test/**/*", "spec/**/*", "features/**/*", "README", "license"]
   s.require_path = "lib"
-  s.autorequire = "rake"
-  s.test_files = FileList["{test}/**/*test.rb"].to_a
+  s.test_files = Dir["{test}/**/*test.rb"]
   s.has_rdoc = true
   s.extra_rdoc_files = ["README", "license"]
   
@@ -29,5 +28,5 @@ spec = Gem::Specification.new do |s|
     
   # development time dependencies
   s.add_development_dependency "ruby-debug"
-  s.add_development_dependency 'rspec',                '1.1.12'
+  s.add_development_dependency 'rspec', '1.1.12'
 end
