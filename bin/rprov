@@ -49,10 +49,15 @@ ST_HELP
     exit
 end
 
+# Read the spec
+spec = nil #trick: declare the spec object here so it will exist outside of the eval block. Otherwise you cannot access it outside of it
+eval File.read(File.join(File.dirname(__FILE__), "../rprov.gemspec"))
+
+
 # OK, no specific command help ? Let's output the general help and exit gracefully
 puts preamble + <<-HELP
 usage: rprov <subcommand> [options] [args]
-Eclipse provisioning Ruby client, version #{EclipseProvisioning::VERSION}
+Eclipse provisioning Ruby client, version #{spec.version}
 
 Type 'rprov help <command-name>' for help on a specific subcommand.
 Type 'rprov --version' to see the program version.
@@ -68,7 +73,7 @@ end
 
 case $*[0]   
 when "--version"
-  puts preamble + "rprov version #{EclipseProvisioning::VERSION}"
+  puts preamble + "rprov version #{spec.version}"
   exit 0
 when "status", "stat", "st"
   if $*.index("-e")
@@ -76,7 +81,7 @@ when "status", "stat", "st"
     $*.delete_at($*.index("-e"))
   end
 
-  instance = EclipseInstance.new(eclipse_location || ".") 
+  instance = Rprov::EclipseInstance.new(eclipse_location || ".") 
   
   if $*.size > 1
     for i in 1..($*.size - 1)

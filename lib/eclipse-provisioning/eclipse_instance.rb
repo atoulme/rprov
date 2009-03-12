@@ -17,33 +17,36 @@ require "manifest"
 require "zip/zip"
 require "zip/zipfilesystem"
 
-#The EclipseInstance class manages an Eclipse instance, with a list of the bundles it contains
-# and the current configuration of Eclipse.
-class EclipseInstance
-  include Manifest # brings a method named read to interpret manifests into hashs.
 
-  # bundles: the bundles of the eclipse instance loaded on startup
-  # location: the location of the Eclipse instance
-  attr_accessor :bundles, :location
+module Rprov
   
-  # info: a bundle info instance
-  attr_reader :info
-  
-  def initialize(location, plugin_locations = ["dropins", "plugins"])
-    @location = location
-    @bundles = []
-    plugin_locations.each do |p_loc|
-      p_loc_complete = @location + File::SEPARATOR + p_loc
-      warn "Folder #{p_loc_complete} not found!" if !File.exists? p_loc_complete 
-      parse(p_loc_complete)  
+  #The EclipseInstance class manages an Eclipse instance, with a list of the bundles it contains
+  # and the current configuration of Eclipse.
+  class EclipseInstance
+    include Manifest # brings a method named read to interpret manifests into hashs.
+
+    # bundles: the bundles of the eclipse instance loaded on startup
+    # location: the location of the Eclipse instance
+    attr_accessor :bundles, :location
+
+    # info: a bundle info instance
+    attr_reader :info
+
+    def initialize(location, plugin_locations = ["dropins", "plugins"])
+      @location = location
+      @bundles = []
+      plugin_locations.each do |p_loc|
+        p_loc_complete = @location + File::SEPARATOR + p_loc
+        warn "Folder #{p_loc_complete} not found!" if !File.exists? p_loc_complete 
+        parse(p_loc_complete)  
+      end
+
+      @info = BundlesInfo.new(@location)
     end
-    
-    @info = BundlesInfo.new(@location)
-  end
-  
-  # Parses the directory and grabs the plugins, adding the created bundle objects to @bundles.
-  def parse(dir)
-    Dir.open(dir) do |plugins|
+
+    # Parses the directory and grabs the plugins, adding the created bundle objects to @bundles.
+    def parse(dir)
+      Dir.open(dir) do |plugins|
         plugins.entries.each do |plugin|
           absolute_plugin_path = "#{plugins.path}#{File::SEPARATOR}#{plugin}"
           if (/.*\.jar$/.match(plugin)) 
@@ -72,33 +75,35 @@ class EclipseInstance
             end
           end
         end
-     end
-  end
-  
-  # Return the list of bundles that are installed in the Eclipse instance, ie the ones in the bundles.info file
-  def installed
-    return @bundles.select {|b| installed? b}
-  end
-  
-  # Return the list of bundles that are marked as uninstalled, ie not present in the bundles.info file
-  def uninstalled
-    return @bundles.select {|b| !installed? b}
-  end
-  
-  # Return the list of bundles that match the criteria passed as arguments
-  def find(criteria = {:name => "", :version =>""})
-    selected = @bundles
-    if (criteria[:name])
-      selected = @bundles.select {|b| b.name == criteria[:name]}
+      end
     end
-    if (criteria[:version])
-      selected = @bundles.select {|b| b.version == criteria[:version]}
+
+    # Return the list of bundles that are installed in the Eclipse instance, ie the ones in the bundles.info file
+    def installed
+      return @bundles.select {|b| installed? b}
     end
-    selected
+
+    # Return the list of bundles that are marked as uninstalled, ie not present in the bundles.info file
+    def uninstalled
+      return @bundles.select {|b| !installed? b}
+    end
+
+    # Return the list of bundles that match the criteria passed as arguments
+    def find(criteria = {:name => "", :version =>""})
+      selected = @bundles
+      if (criteria[:name])
+        selected = @bundles.select {|b| b.name == criteria[:name]}
+      end
+      if (criteria[:version])
+        selected = @bundles.select {|b| b.version == criteria[:version]}
+      end
+      selected
+    end
+
+    # Returns true if the bundle is installed, ie present in bundles.info
+    def installed?(bundle)
+      @info.bundles.include? bundle
+    end  
   end
-  
-  # Returns true if the bundle is installed, ie present in bundles.info
-  def installed?(bundle)
-    @info.bundles.include? bundle
-  end  
+
 end

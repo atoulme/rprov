@@ -27,7 +27,7 @@ class TestBundlesInfo < Test::Unit::TestCase
   end
   
   def test_load_and_save
-    info = BundlesInfo.new(File.dirname(@tmpFile), File.basename(@tmpFile))
+    info = Rprov::BundlesInfo.new(File.dirname(@tmpFile), File.basename(@tmpFile))
     assert info.bundles.size == 2
     assert info.bundles.first.name == "com.ibm.icu.source"
     
