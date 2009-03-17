@@ -36,7 +36,7 @@ module Rprov
       @location = location
       @bundles = []
       plugin_locations.each do |p_loc|
-        p_loc_complete = @location + File::SEPARATOR + p_loc
+        p_loc_complete = File.join(@location, p_loc)
         warn "Folder #{p_loc_complete} not found!" if !File.exists? p_loc_complete 
         parse(p_loc_complete)  
       end
@@ -92,10 +92,10 @@ module Rprov
     def find(criteria = {:name => "", :version =>""})
       selected = @bundles
       if (criteria[:name])
-        selected = @bundles.select {|b| b.name == criteria[:name]}
+        selected = selected.select {|b| b.name == criteria[:name]}
       end
       if (criteria[:version])
-        selected = @bundles.select {|b| b.version == criteria[:version]}
+        selected = selected.select {|b| b.version == criteria[:version]}
       end
       selected
     end

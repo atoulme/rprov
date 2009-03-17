@@ -11,7 +11,7 @@
 
 spec = Gem::Specification.new do |s| 
   s.name = "rprov"
-  s.version = "0.0.1"
+  s.version = "0.0.2"
   s.author = "Intalio, Inc"
   s.email = "github@intalio.com"
   s.homepage = "http://www.github.com/intalio/rprov"
