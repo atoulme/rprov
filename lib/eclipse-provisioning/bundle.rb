@@ -67,7 +67,7 @@ module Rprov
       if b.nil? || !(b.is_a? Bundle)
         false
       else
-        b.name == @name && b.version == @version
+        b.name == name && b.version == version
       end
     end
   end

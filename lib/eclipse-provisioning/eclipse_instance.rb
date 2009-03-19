@@ -32,16 +32,22 @@ module Rprov
     # info: a bundle info instance
     attr_reader :info
 
-    def initialize(location, plugin_locations = ["dropins", "plugins"])
+    # Default constructor for the Eclipse instance
+    # 
+    # location: the location of the Eclipse instance
+    # plugin_locations, default value is ["dropins", "plugins"] 
+    # create_bundle_info, default value is true
+    def initialize(location, plugin_locations = ["dropins", "plugins"], create_bundle_info = true)
       @location = location
       @bundles = []
       plugin_locations.each do |p_loc|
         p_loc_complete = File.join(@location, p_loc)
+        p p_loc_complete
         warn "Folder #{p_loc_complete} not found!" if !File.exists? p_loc_complete 
-        parse(p_loc_complete)  
+        parse(p_loc_complete) if File.exists? p_loc_complete
       end
 
-      @info = BundlesInfo.new(@location)
+      @info = BundlesInfo.new(@location) if create_bundle_info
     end
 
     # Parses the directory and grabs the plugins, adding the created bundle objects to @bundles.
@@ -80,17 +86,17 @@ module Rprov
 
     # Return the list of bundles that are installed in the Eclipse instance, ie the ones in the bundles.info file
     def installed
-      return @bundles.select {|b| installed? b}
+      return bundles.select {|b| installed? b}
     end
 
     # Return the list of bundles that are marked as uninstalled, ie not present in the bundles.info file
     def uninstalled
-      return @bundles.select {|b| !installed? b}
+      return bundles.select {|b| !installed? b}
     end
 
     # Return the list of bundles that match the criteria passed as arguments
     def find(criteria = {:name => "", :version =>""})
-      selected = @bundles
+      selected = bundles
       if (criteria[:name])
         selected = selected.select {|b| b.name == criteria[:name]}
       end
